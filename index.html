@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma de Contexto (PESTEL · PCI · DOFA) y Riesgos Corporativos</title>
+  <!-- Chart.js para visualizaciones gerenciales interactivas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --secondary: #0d3b66;
+      --accent: #0072ce;
+      --accent-light: #eff6ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --success: #059669;
+      --success-bg: #d1fae5;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: #ffffff;
+      padding: 24px 32px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    header h1 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    header p { margin: 0; font-size: 13.5px; color: #cbd5e1; }
+
+    /* Barra Superior de Modalidad */
+    .mode-bar {
+      background: #1e293b;
+      padding: 10px 32px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .mode-btn {
+      background: #334155;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      padding: 7px 15px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Pestañas de Navegación */
+    nav {
+      display: flex;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    nav button {
+      background: none;
+      border: none;
+      padding: 14px 18px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    nav button.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    main { max-width: 1400px; margin: 24px auto; padding: 0 20px; }
+    .view-content { display: none; }
+    .view-content.active { display: block; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .card h3 { margin-top: 0; font-size: 17.5px; color: var(--secondary); font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+
+    .edu-banner {
+      background: #eff6ff;
+      border-left: 5px solid var(--accent);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 18px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #1e3a8a;
+    }
+    .edu-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+    .edu-col {
+      flex: 1 1 240px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .edu-col strong { color: var(--secondary); display: block; margin-bottom: 6px; font-size: 13.5px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; background: #fff; }
+    th, td { padding: 9px 11px; border: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { background: #f1f5f9; color: var(--primary); font-weight: 700; position: sticky; top: 0; }
+    input, select, textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 12.5px;
+      background: #fff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-warn { background: var(--warning-bg); color: var(--warning); }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+    .btn-danger { background: var(--danger); }
+
+    .kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .kpi-box {
+      flex: 1 1 200px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .kpi-box .val { font-size: 26px; font-weight: 800; color: var(--secondary); margin-top: 4px; }
+    .kpi-box .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 18px; margin-bottom: 20px; }
+    .dash-panel { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+    .dash-panel h4 { margin: 0 0 14px 0; font-size: 15px; color: var(--primary); font-weight: 800; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+
+    .pci-bar-container { margin-bottom: 10px; }
+    .pci-bar-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .pci-bar-bg { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; }
+    .pci-bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; }
+
+    .filter-pci { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .filter-btn {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--secondary);
+      color: #fff;
+      border-color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sistema Integrado de Análisis de Contexto y Gestión del Riesgo</h1>
+    <p>Alineado a ISO 31000:2018 · Modelo Humberto Serna Gómez (PCI 50 Variables) · ASIS ESRM</p>
+  </header>
+
+  <!-- SELECTOR DE MODO -->
+  <div class="mode-bar">
+    <span style="color: #94a3b8; font-size: 12px; font-weight: 700; text-transform: uppercase;">Modo de Uso:</span>
+    <button class="mode-btn active" id="btn-mode-edu" onclick="setAppMode('edu')">📖 1. Aprender Metodología (Guías & Fuentes)</button>
+    <button class="mode-btn" id="btn-mode-ops" onclick="setAppMode('ops')">⚙️ 2. Diagnosticar y Usar (Constructor Práctico)</button>
+  </div>
+
+  <!-- NAVEGACIÓN PRINCIPAL -->
+  <nav>
+    <button class="active" onclick="switchNav('dash')">📊 Dashboard Ejecutivo</button>
+    <button onclick="switchNav('pestel')">🌍 1. Contexto Externo (PESTEL Completo)</button>
+    <button onclick="switchNav('pci')">🏢 2. Contexto Interno (PCI - 50 Variables)</button>
+    <button onclick="switchNav('dofa')">🔄 3. Matriz DOFA Cruzada</button>
+    <button onclick="switchNav('riesgos')">🛡️ 4. Matriz de Riesgos Corporativa</button>
+  </nav>
+
+  <main>
+
+    <!-- ============================================================== -->
+    <!-- 0. DASHBOARD EJECUTIVO GENERAL                                 -->
+    <!-- ============================================================== -->
+    <div id="view-dash" class="view-content active">
+
+      <div class="edu-section card">
+        <h3>📘 Tablero de Control Gerencial de Contexto e Incertidumbre</h3>
+        <div class="edu-banner">
+          Este tablero consolida en tiempo real la información de las 4 metodologías. Permite al Directorio responder tres preguntas estratégicas: 
+          <strong>1.</strong> ¿A cuántas amenazas macro estamos expuestos? 
+          <strong>2.</strong> ¿Qué tan maduras están nuestras 5 capacidades internas (PCI)? 
+          <strong>3.</strong> ¿Cuántos riesgos corporativos permanecen en zona inaceptable tras la aplicación de controles?
+        </div>
+      </div>
+
+      <!-- TARJETAS KPI -->
+      <div class="kpi-row">
+        <div class="kpi-box">
+          <div class="lbl">Amenazas Macro (PESTEL)</div>
+          <div class="val" id="dash-threats" style="color: var(--danger);">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="lbl">Debilidades Críticas (PCI)</div>
+          <div class="val" id="dash-weaknesses" style="color: var(--warning);">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="lbl">Riesgos Críticos Residuales</div>
+          <div class="val" id="dash-crit-risks" style="color: var(--danger);">0</div>
+        </div>
+        <div class="kpi-box">
+          <div class="lbl">Eficacia Promedio de Controles</div>
+          <div class="val" id="dash-ctrl-eff" style="color: var(--success);">0%</div>
+        </div>
+        <div class="kpi-box">
+          <div class="lbl">Índice Salud PCI Ponderado</div>
+          <div class="val" id="dash-pci-health">0%</div>
+        </div>
+      </div>
+
+      <!-- PANELES ANALÍTICOS -->
+      <div class="dash-grid">
+        
+        <!-- PANEL PCI: SALUD POR CAPACIDAD PONDERADA -->
+        <div class="dash-panel">
+          <h4>🏢 Salud Endógena por Capacidad PCI (Serna Gómez)</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Porcentaje de solidez interna según la ponderación oficial del modelo:</p>
+          
+          <div class="pci-bar-container">
+            <div class="pci-bar-label"><span>Capacidad Directiva (40%)</span><span id="pci-score-dir">0%</span></div>
+            <div class="pci-bar-bg"><div id="bar-dir" class="pci-bar-fill" style="background:#0072ce; width: 0%;"></div></div>
+          </div>
+          <div class="pci-bar-container">
+            <div class="pci-bar-label"><span>Capacidad Tecnológica (30%)</span><span id="pci-score-tec">0%</span></div>
+            <div class="pci-bar-bg"><div id="bar-tec" class="pci-bar-fill" style="background:#0d9488; width: 0%;"></div></div>
+          </div>
+          <div class="pci-bar-container">
+            <div class="pci-bar-label"><span>Capacidad Competitiva (20%)</span><span id="pci-score-com">0%</span></div>
+            <div class="pci-bar-bg"><div id="bar-com" class="pci-bar-fill" style="background:#f59e0b; width: 0%;"></div></div>
+          </div>
+          <div class="pci-bar-container">
+            <div class="pci-bar-label"><span>Capacidad Financiera (5%)</span><span id="pci-score-fin">0%</span></div>
+            <div class="pci-bar-bg"><div id="bar-fin" class="pci-bar-fill" style="background:#10b981; width: 0%;"></div></div>
+          </div>
+          <div class="pci-bar-container">
+            <div class="pci-bar-label"><span>Capacidad Talento Humano (5%)</span><span id="pci-score-hum">0%</span></div>
+            <div class="pci-bar-bg"><div id="bar-hum" class="pci-bar-fill" style="background:#8b5cf6; width: 0%;"></div></div>
+          </div>
+        </div>
+
+        <!-- PANEL MATRIZ DE RIESGOS: SEMAFORIZACIÓN RESIDUAL -->
+        <div class="dash-panel">
+          <h4>🛡️ Mapa de Calor Residual Corporativo</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Distribución de los riesgos tras la aplicación de controles:</p>
+          <div style="display: flex; gap: 12px;">
+            <div style="flex: 1; background: var(--danger-bg); border: 1px solid #fecaca; border-radius: 8px; padding: 14px; text-align: center;">
+              <span style="font-size: 11px; font-weight: 700; color: #991b1b; display: block;">INACEPTABLE (>=12)</span>
+              <div id="heat-high" style="font-size: 26px; font-weight: 800; color: var(--danger); margin-top: 4px;">0</div>
+            </div>
+            <div style="flex: 1; background: var(--warning-bg); border: 1px solid #fde68a; border-radius: 8px; padding: 14px; text-align: center;">
+              <span style="font-size: 11px; font-weight: 700; color: #92400e; display: block;">TOLERABLE (6-11)</span>
+              <div id="heat-mid" style="font-size: 26px; font-weight: 800; color: var(--warning); margin-top: 4px;">0</div>
+            </div>
+            <div style="flex: 1; background: var(--success-bg); border: 1px solid #a7f3d0; border-radius: 8px; padding: 14px; text-align: center;">
+              <span style="font-size: 11px; font-weight: 700; color: #166534; display: block;">ACEPTABLE (1-5)</span>
+              <div id="heat-low" style="font-size: 26px; font-weight: 800; color: var(--success); margin-top: 4px;">0</div>
+            </div>
+          </div>
+          <div style="margin-top: 14px; font-size: 12px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            💡 <strong>Regla ESRM:</strong> Los riesgos en nivel inaceptable requieren que el <em>Asset Owner</em> presente un plan de tratamiento con asignación de presupuesto (CAPEX/OPEX).
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PANEL DE VULNERABILIDADES PRIORITARIAS (PARETO) -->
+      <div class="card">
+        <h3>🚨 Top 5 Debilidades Internas Críticas (Foco Pareto para la Matriz)</h3>
+        <p style="font-size: 12.5px; color: var(--text-muted);">Variables del PCI con calificación 4 o 5 e impacto alto en la misión que deben tratarse de inmediato:</p>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%;">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Capacidad Estratégica</th>
+                <th style="width: 45%;">Variable Afectada</th>
+                <th style="width: 15%;">Condición</th>
+                <th style="width: 15%;">Impacto Misión</th>
+              </tr>
+            </thead>
+            <tbody id="dash-top-weaknesses"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 1. PESTEL COMPLETO                                             -->
+    <!-- ============================================================== -->
+    <div id="view-pestel" class="view-content">
+
+      <div class="edu-section card">
+        <h3>📘 Fundamento Metodológico: Macroentorno PESTEL (ISO 31000 Cláusula 5.4.1)</h3>
+        <div class="edu-banner">
+          <strong>¿Qué es y para qué sirve?</strong> El análisis PESTEL audita las fuerzas exógenas que la empresa no controla. No son riesgos por sí mismos; son <strong>fuentes o condiciones de entorno</strong> que alimentan la DOFA como <em>Amenazas</em> u <em>Oportunidades</em>, y la Matriz de Riesgos como la <em>Causa Raíz Externa</em>.
+        </div>
+        <div class="edu-grid">
+          <div class="edu-col"><strong>Político (P)</strong> Gacetas oficiales, riesgo país, acuerdos bilaterales y estabilidad de gobierno.</div>
+          <div class="edu-col"><strong>Económico (E)</strong> Inflación del Banco Central, tasas de interés, devaluación y capacidad de pago.</div>
+          <div class="edu-col"><strong>Social (S)</strong> Seguridad pública, criminalidad zonal, sindicatos y conflictividad comunitaria.</div>
+          <div class="edu-col"><strong>Tecnológico (T)</strong> CSIRT nacional, marcos NIST, ciberamenazas y obsolescencia tecnológica.</div>
+          <div class="edu-col"><strong>Ecológico (E)</strong> Alertas hidrometeorológicas, desastres naturales y huella ambiental.</div>
+          <div class="edu-col"><strong>Legal (L)</strong> Diarios oficiales, reformas tributarias, circulares y normativas laborales.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          Taller Operativo: Inventario de Variables de Macroentorno PESTEL
+          <span style="font-size: 13px; color: var(--text-muted); font-weight: normal;">(Evaluación Exhaustiva de Fuentes)</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Califica cada una de las variables predefinidas en tus fuentes oficiales. Aquellas valoradas como <strong>Amenaza</strong> con impacto <strong>Alto</strong> se transfieren al Dashboard, a la DOFA y a la Matriz de Riesgos.
+        </p>
+        <div style="overflow-x: auto; max-height: 550px;">
+          <table id="table-pestel">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Dimensión</th>
+                <th>Variable de Macroentorno (Oficial)</th>
+                <th style="width: 130px;">Naturaleza</th>
+                <th style="width: 130px;">Impacto en Misión</th>
+                <th style="width: 120px;">Clasificación</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 2. PCI COMPLETO (50 VARIABLES DE HUMBERTO SERNA GÓMEZ)         -->
+    <!-- ============================================================== -->
+    <div id="view-pci" class="view-content">
+
+      <div class="edu-section card">
+        <h3>📘 Fundamento Metodológico: Modelo PCI de Humberto Serna Gómez (50 Variables)</h3>
+        <div class="edu-banner">
+          <strong>¿Qué es y para qué sirve?</strong> El Perfil de Capacidad Interna (PCI) evalúa las fortalezas y debilidades endógenas mediante 5 capacidades estratégicas ponderadas (Directiva 40%, Competitiva 20%, Financiera 5%, Tecnológica 30%, Talento Humano 5%). El objetivo (principio de Pareto) es aislar el 20% de debilidades críticas que detonan el 80% de los riesgos.
+        </div>
+        <div class="edu-grid">
+          <div class="edu-col"><strong>1. Directiva (40% - 12 Var)</strong> Gobernanza, agilidad de respuesta, planes y liderazgo.</div>
+          <div class="edu-col"><strong>2. Competitiva (20% - 13 Var)</strong> Calidad, exclusividad, lealtad de clientes y logística.</div>
+          <div class="edu-col"><strong>3. Financiera (5% - 6 Var)</strong> Flujo de caja, liquidez, apalancamiento y rentabilidad.</div>
+          <div class="edu-col"><strong>4. Tecnológica (30% - 9 Var)</strong> Sistemas TI, automatización, innovación y patentes.</div>
+          <div class="edu-col"><strong>5. Talento Humano (5% - 10 Var)</strong> Rotación, clima laboral, competencias y accidentalidad.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          Taller Operativo: Auditoría Integral PCI (50 Variables Oficiales)
+          <span style="font-size: 13px; color: var(--text-muted); font-weight: normal;">(Serna Gómez)</span>
+        </h3>
+
+        <!-- FILTROS POR CAPACIDAD -->
+        <div class="filter-pci">
+          <button class="filter-btn active" onclick="filterPciCategory('ALL')">Todas (50)</button>
+          <button class="filter-btn" onclick="filterPciCategory('Capacidad Directiva (40%)')">Directiva (12)</button>
+          <button class="filter-btn" onclick="filterPciCategory('Capacidad Competitiva (20%)')">Competitiva (13)</button>
+          <button class="filter-btn" onclick="filterPciCategory('Capacidad Financiera (5%)')">Financiera (6)</button>
+          <button class="filter-btn" onclick="filterPciCategory('Capacidad Tecnológica (30%)')">Tecnológica (9)</button>
+          <button class="filter-btn" onclick="filterPciCategory('Capacidad Talento Humano (5%)')">Talento Humano (10)</button>
+        </div>
+
+        <div style="overflow-x: auto; max-height: 550px;">
+          <table id="table-pci">
+            <thead>
+              <tr>
+                <th style="width: 190px;">Capacidad Ponderada</th>
+                <th>Variable de Diagnóstico Interno</th>
+                <th style="width: 170px;">Calificación (Condición)</th>
+                <th style="width: 140px;">Impacto en Misión</th>
+                <th style="width: 130px;">Resultado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 3. DOFA ESTRATÉGICA CRUZADA                                    -->
+    <!-- ============================================================== -->
+    <div id="view-dofa" class="view-content">
+
+      <div class="edu-section card">
+        <h3>📘 Fundamento Metodológico: La DOFA Cruzada de Riesgos y Estrategia</h3>
+        <div class="edu-banner">
+          <strong>Articulación con el Riesgo:</strong> La DOFA Cruzada conecta lo macro (PESTEL) con lo micro (PCI). La intersección <strong>DA (Debilidad Interna + Amenaza Externa)</strong> representa el foco crítico de incertidumbre. La formulación de una estrategia DA se convierte directamente en el <em>Control Preventivo y Mitigante</em> que se registra en la Matriz de Riesgos.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Consolidación Automática de Contexto: PESTEL + PCI ➔ DOFA</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          A continuación se consolidan automáticamente los factores priorizados de tus evaluaciones:
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <!-- FORTALEZAS -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px;">
+            <strong style="color: #166534; font-size: 13.5px;">💪 FORTALEZAS (PCI - Nota 1 y 2)</strong>
+            <ul id="dofa-f" style="font-size: 12px; color: #14532d; padding-left: 20px; margin: 8px 0 0 0; max-height: 200px; overflow-y: auto;"></ul>
+          </div>
+          <!-- DEBILIDADES -->
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px;">
+            <strong style="color: #991b1b; font-size: 13.5px;">⚠️ DEBILIDADES CRÍTICAS (PCI - Nota 4 y 5)</strong>
+            <ul id="dofa-d" style="font-size: 12px; color: #7f1d1d; padding-left: 20px; margin: 8px 0 0 0; max-height: 200px; overflow-y: auto;"></ul>
+          </div>
+          <!-- OPORTUNIDADES -->
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px;">
+            <strong style="color: #1e40af; font-size: 13.5px;">🚀 OPORTUNIDADES (PESTEL)</strong>
+            <ul id="dofa-o" style="font-size: 12px; color: #1e3a8a; padding-left: 20px; margin: 8px 0 0 0; max-height: 200px; overflow-y: auto;"></ul>
+          </div>
+          <!-- AMENAZAS -->
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px;">
+            <strong style="color: #92400e; font-size: 13.5px;">🚨 AMENAZAS RELEVANTES (PESTEL)</strong>
+            <ul id="dofa-a" style="font-size: 12px; color: #78350f; padding-left: 20px; margin: 8px 0 0 0; max-height: 200px; overflow-y: auto;"></ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+          <strong style="color: var(--secondary); font-size: 13.5px;">Estrategia DA (Tratamiento del Riesgo / Control Preventivo):</strong>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 8px 0;">Formula cómo blindar una debilidad interna crítica frente a una amenaza del entorno:</p>
+          <textarea id="dofa-strat-da" rows="2" placeholder="Ej: Ante la amenaza de regulaciones tributarias y la debilidad en sistemas de control TI, se automatizará el cálculo impositivo en el ERP con firma digital."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 4. MATRIZ DE RIESGOS INTEGRAL                                  -->
+    <!-- ============================================================== -->
+    <div id="view-riesgos" class="view-content">
+
+      <div class="edu-section card">
+        <h3>📘 Fundamento Metodológico: De las Fuentes de Contexto al Riesgo Residual</h3>
+        <div class="edu-banner">
+          <strong>Enfoque ESRM / ISO 31000:</strong> Cada riesgo se asocia a un <em>Activo Crítico</em>. La causa externa proviene de <em>PESTEL</em>, la vulnerabilidad de una <em>Debilidad PCI</em> y el control de la <em>Estrategia DA</em>. La efectividad de control descuenta matemáticamente la severidad inicial.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          Matriz de Gestión Integral de Riesgos
+          <button class="btn" onclick="addRiskRow()">+ Nuevo Riesgo</button>
+        </h3>
+        <div style="overflow-x: auto;">
+          <table id="table-risks">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Activo Crítico (ESRM)</th>
+                <th>Redacción Ejecutiva (Evento + Causa PESTEL + Falla PCI)</th>
+                <th style="width: 75px;">Prob. (1-5)</th>
+                <th style="width: 75px;">Imp. (1-5)</th>
+                <th style="width: 80px;">R. Inherente</th>
+                <th>Control Existente (Derivado DA)</th>
+                <th style="width: 110px;">Tipo Control</th>
+                <th style="width: 110px;">Ejecución</th>
+                <th style="width: 90px;">Eficacia (%)</th>
+                <th style="width: 90px;">R. Residual</th>
+                <th style="width: 50px;"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let appMode = 'edu';
+    let currentPciCategory = 'ALL';
+
+    function setAppMode(mode) {
+      appMode = mode;
+      document.getElementById('btn-mode-edu').classList.toggle('active', mode === 'edu');
+      document.getElementById('btn-mode-ops').classList.toggle('active', mode === 'ops');
+      document.querySelectorAll('.edu-section').forEach(el => {
+        el.style.display = mode === 'edu' ? 'block' : 'none';
+      });
+    }
+
+    function switchNav(viewId) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      event.target.classList.add('active');
+      syncDofa();
+      updateDashboard();
+    }
+
+    // ==============================================================
+    // 1. INVENTARIO COMPLETO PESTEL
+    // ==============================================================
+    const pestelData = [
+      { dim: "Político", varName: "Cambios en las políticas de gobierno", nat: "Amenaza", imp: "Alto" },
+      { dim: "Político", varName: "Cambios en las políticas de exportación", nat: "Amenaza", imp: "Medio" },
+      { dim: "Político", varName: "Cambios en las políticas de importación", nat: "Amenaza", imp: "Medio" },
+      { dim: "Político", varName: "Nuevos tratados comerciales", nat: "Oportunidad", imp: "Alto" },
+      { dim: "Político", varName: "Adhesión a nuevos entes no gubernamentales", nat: "Oportunidad", imp: "Bajo" },
+      { dim: "Político", varName: "Incremento de nivel de desconfianza del país", nat: "Amenaza", imp: "Alto" },
+      { dim: "Político", varName: "Guerra regular con algún potencial enemigo del Estado", nat: "Amenaza", imp: "Bajo" },
+      { dim: "Político", varName: "Guerra irregular con actores armados", nat: "Amenaza", imp: "Alto" },
+      { dim: "Político", varName: "Cambios en materia de impuestos", nat: "Amenaza", imp: "Alto" },
+      { dim: "Político", varName: "Aumento o disminución de incentivos para empresas", nat: "Oportunidad", imp: "Medio" },
+      { dim: "Político", varName: "Nuevas regulaciones en la empleabilidad", nat: "Amenaza", imp: "Medio" },
+      { dim: "Político", varName: "Cambio de gobierno regional", nat: "Amenaza", imp: "Medio" },
+      { dim: "Político", varName: "Nuevos partidos políticos", nat: "Amenaza", imp: "Bajo" },
+      { dim: "Político", varName: "Creación de nuevas agremiaciones o sindicatos", nat: "Amenaza", imp: "Medio" },
+      { dim: "Económico", varName: "Tasa de inflación y pérdida de poder adquisitivo", nat: "Amenaza", imp: "Alto" },
+      { dim: "Económico", varName: "Fluctuaciones en tasas de interés bancarias", nat: "Amenaza", imp: "Alto" },
+      { dim: "Económico", varName: "Variación en la tasa de cambio de divisas (TRM)", nat: "Amenaza", imp: "Alto" },
+      { dim: "Económico", varName: "Nivel de desempleo en la zona de influencia", nat: "Amenaza", imp: "Medio" },
+      { dim: "Económico", varName: "Crecimiento del PIB sectorial", nat: "Oportunidad", imp: "Medio" },
+      { dim: "Social", varName: "Conflictividad social y bloqueos de vías comunitarias", nat: "Amenaza", imp: "Alto" },
+      { dim: "Social", varName: "Índice de criminalidad y delincuencia organizada zonal", nat: "Amenaza", imp: "Alto" },
+      { dim: "Social", varName: "Cambios en patrones de consumo del cliente", nat: "Oportunidad", imp: "Medio" },
+      { dim: "Social", varName: "Demografía y disponibilidad de mano de obra local", nat: "Oportunidad", imp: "Medio" },
+      { dim: "Tecnológico", varName: "Adopción de automatización e Inteligencia Artificial", nat: "Oportunidad", imp: "Alto" },
+      { dim: "Tecnológico", varName: "Incremento de incidentes globales de ciberataques (Ransomware)", nat: "Amenaza", imp: "Alto" },
+      { dim: "Tecnológico", varName: "Obsolescencia acelerada de plataformas tecnológicas", nat: "Amenaza", imp: "Medio" },
+      { dim: "Tecnológico", varName: "Disponibilidad de infraestructura cloud y telecomunicaciones", nat: "Oportunidad", imp: "Alto" },
+      { dim: "Ecológico", varName: "Fenómenos climáticos extremos (inundaciones / sequías)", nat: "Amenaza", imp: "Alto" },
+      { dim: "Ecológico", varName: "Regulaciones sobre descarbonización y huella de carbono", nat: "Amenaza", imp: "Medio" },
+      { dim: "Ecológico", varName: "Disponibilidad y estrés del recurso hídrico", nat: "Amenaza", imp: "Medio" },
+      { dim: "Legal", varName: "Leyes de protección de datos personales y privacidad", nat: "Amenaza", imp: "Alto" },
+      { dim: "Legal", varName: "Reformas al código de trabajo y pensiones", nat: "Amenaza", imp: "Medio" },
+      { dim: "Legal", varName: "Normativas sanitarias, ambientales y de inocuidad", nat: "Amenaza", imp: "Alto" }
+    ];
+
+    // ==============================================================
+    // 2. INVENTARIO COMPLETO PCI (50 VARIABLES DE HUMBERTO SERNA GÓMEZ)
+    // ==============================================================
+    const pciData = [
+      // DIRECTIVA (40% - 12)
+      { cap: "Capacidad Directiva (40%)", varName: "Uso de análisis y planes estratégicos", cal: 2, imp: 5 },
+      { cap: "Capacidad Directiva (40%)", varName: "Velocidad de respuesta a condiciones cambiantes", cal: 4, imp: 5 },
+      { cap: "Capacidad Directiva (40%)", varName: "Flexibilidad de la estructura organizacional", cal: 3, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Comunicación y control gerencial", cal: 3, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Experiencia y conocimiento de directivos", cal: 1, imp: 5 },
+      { cap: "Capacidad Directiva (40%)", varName: "Habilidad para atraer y retener gente creativa", cal: 4, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Habilidad para responder tecnologías cambiantes", cal: 4, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Habilidad para manejar fluctuaciones económicas", cal: 3, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Sistemas de control eficaces", cal: 4, imp: 5 },
+      { cap: "Capacidad Directiva (40%)", varName: "Sistemas de tomas de decisiones", cal: 2, imp: 4 },
+      { cap: "Capacidad Directiva (40%)", varName: "Liderazgo", cal: 2, imp: 5 },
+      { cap: "Capacidad Directiva (40%)", varName: "Capacidad para enfrentar a la competencia", cal: 2, imp: 4 },
+
+      // COMPETITIVA (20% - 13)
+      { cap: "Capacidad Competitiva (20%)", varName: "Calidad y exclusividad del producto o servicio", cal: 1, imp: 5 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Lealtad y satisfacción del cliente", cal: 2, imp: 5 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Participación de mercado (Market Share)", cal: 3, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Costos de distribución y entrega", cal: 4, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Amplitud y profundidad de portafolio", cal: 2, imp: 3 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Investigación y desarrollo de nuevos productos", cal: 4, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Solidez y confiabilidad de proveedores clave", cal: 2, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Efectividad de la red de ventas y comercialización", cal: 2, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Imagen y posicionamiento de marca", cal: 1, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Capacidad de respuesta al servicio postventa", cal: 3, imp: 3 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Política de fijación de precios competitiva", cal: 3, imp: 4 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Barreras de entrada frente a nuevos competidores", cal: 2, imp: 3 },
+      { cap: "Capacidad Competitiva (20%)", varName: "Canales de distribución diversificados", cal: 4, imp: 4 },
+
+      // FINANCIERA (5% - 6)
+      { cap: "Capacidad Financiera (5%)", varName: "Acceso a fuentes de capital y crédito bancario", cal: 2, imp: 4 },
+      { cap: "Capacidad Financiera (5%)", varName: "Capacidad de endeudamiento y apalancamiento", cal: 3, imp: 4 },
+      { cap: "Capacidad Financiera (5%)", varName: "Rentabilidad sobre inversión y activos (ROI/ROA)", cal: 2, imp: 5 },
+      { cap: "Capacidad Financiera (5%)", varName: "Liquidez inmediata y flujo de caja operativo", cal: 4, imp: 5 },
+      { cap: "Capacidad Financiera (5%)", varName: "Estructura de costos fijos y variables", cal: 3, imp: 4 },
+      { cap: "Capacidad Financiera (5%)", varName: "Habilidad para competir con precios flexibles", cal: 3, imp: 3 },
+
+      // TECNOLÓGICA (30% - 9)
+      { cap: "Capacidad Tecnológica (30%)", varName: "Habilidad y capacidad técnica de manufactura/operación", cal: 2, imp: 5 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Capacidad de innovación técnica en procesos", cal: 4, imp: 4 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Nivel de tecnología aplicada en productos", cal: 2, imp: 4 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Patentes, licencias y propiedad intelectual", cal: 3, imp: 3 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Nivel de automatización de procesos operativos", cal: 4, imp: 5 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Disponibilidad y estabilidad de infraestructura TI", cal: 4, imp: 5 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Planes de respaldo y recuperación ante desastres (DRP)", cal: 5, imp: 5 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Seguridad informática y protección perimetral de red", cal: 4, imp: 5 },
+      { cap: "Capacidad Tecnológica (30%)", varName: "Tiempos de ciclo y mantenibilidad tecnológica", cal: 3, imp: 4 },
+
+      // TALENTO HUMANO (5% - 10)
+      { cap: "Capacidad Talento Humano (5%)", varName: "Nivel académico y calificación técnica del personal", cal: 2, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Experiencia técnica acumulada en puestos críticos", cal: 2, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Estabilidad laboral y permanencia", cal: 3, imp: 3 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Tasa de rotación interna de colaboradores", cal: 4, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Índice de ausentismo laboral no justificado", cal: 3, imp: 3 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Nivel de motivación y sentido de pertenencia", cal: 3, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Tasa de accidentalidad y seguridad ocupacional (SST)", cal: 2, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Eficacia de programas de inducción y capacitación", cal: 4, imp: 3 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Relaciones sindicales y clima laboral", cal: 2, imp: 4 },
+      { cap: "Capacidad Talento Humano (5%)", varName: "Mecanismos de evaluación de desempeño", cal: 3, imp: 3 }
+    ];
+
+    // ==============================================================
+    // 3. MATRIZ DE RIESGOS INTEGRAL
+    // ==============================================================
+    const risksData = [
+      {
+        asset: "Servidores ERP",
+        desc: "Caída de bases de datos de facturación por ciberataque de ransomware, facilitada por debilidad en DRP (PCI) y aumento de amenazas cibernéticas (PESTEL).",
+        prob: 4, imp: 5,
+        ctrl: "Backups semanales en cinta magnética local",
+        ctrlType: "Correctivo", ctrlExec: "Manual", eff: 35
+      },
+      {
+        asset: "Flota de Distribución",
+        desc: "Pérdida de carga o penalidad por entrega tardía derivada de bloqueos de vías no anticipados en corredores primarios.",
+        prob: 4, imp: 4,
+        ctrl: "Monitoreo satelital GPS 24/7 y desvío a rutas alternas",
+        ctrlType: "Preventivo", ctrlExec: "Automático", eff: 75
+      }
+    ];
+
+    // RENDER PESTEL
+    function renderPestel() {
+      const tbody = document.querySelector("#table-pestel tbody");
+      tbody.innerHTML = "";
+      pestelData.forEach((item, index) => {
+        const badge = item.nat === "Amenaza" ? "badge-danger" : "badge-success";
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-weight: 700; color: var(--secondary);">${item.dim}</td>
+            <td>${item.varName}</td>
+            <td>
+              <select onchange="pestelData[${index}].nat = this.value; renderPestel(); syncDofa(); updateDashboard();">
+                <option value="Amenaza" ${item.nat === 'Amenaza' ? 'selected' : ''}>Amenaza</option>
+                <option value="Oportunidad" ${item.nat === 'Oportunidad' ? 'selected' : ''}>Oportunidad</option>
+              </select>
+            </td>
+            <td>
+              <select onchange="pestelData[${index}].imp = this.value; renderPestel(); syncDofa(); updateDashboard();">
+                <option value="Alto" ${item.imp === 'Alto' ? 'selected' : ''}>Alto</option>
+                <option value="Medio" ${item.imp === 'Medio' ? 'selected' : ''}>Medio</option>
+                <option value="Bajo" ${item.imp === 'Bajo' ? 'selected' : ''}>Bajo</option>
+              </select>
+            </td>
+            <td><span class="badge ${badge}">${item.nat} (${item.imp})</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    // FILTRO PCI
+    function filterPciCategory(cat) {
+      currentPciCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderPci();
+    }
+
+    // RENDER PCI
+    function renderPci() {
+      const tbody = document.querySelector("#table-pci tbody");
+      tbody.innerHTML = "";
+      pciData.forEach((item, index) => {
+        if (currentPciCategory !== 'ALL' && item.cap !== currentPciCategory) return;
+
+        const isWeak = item.cal >= 4;
+        const badge = isWeak ? "badge-danger" : (item.cal <= 2 ? "badge-success" : "badge-warn");
+        const label = isWeak ? `Debilidad (${item.cal})` : (item.cal <= 2 ? `Fortaleza (${item.cal})` : `En Desarr. (${item.cal})`);
+
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-weight: 600; color: var(--primary); font-size: 11.5px;">${item.cap}</td>
+            <td>${item.varName}</td>
+            <td>
+              <select onchange="pciData[${index}].cal = parseInt(this.value); renderPci(); syncDofa(); updateDashboard();">
+                <option value="1" ${item.cal === 1 ? 'selected' : ''}>1. Fortaleza Estratégica</option>
+                <option value="2" ${item.cal === 2 ? 'selected' : ''}>2. Fortaleza</option>
+                <option value="3" ${item.cal === 3 ? 'selected' : ''}>3. Capacidad en Desarrollo</option>
+                <option value="4" ${item.cal === 4 ? 'selected' : ''}>4. Debilidad</option>
+                <option value="5" ${item.cal === 5 ? 'selected' : ''}>5. Debilidad Absoluta</option>
+              </select>
+            </td>
+            <td>
+              <select onchange="pciData[${index}].imp = parseInt(this.value); renderPci(); syncDofa(); updateDashboard();">
+                <option value="5" ${item.imp === 5 ? 'selected' : ''}>5. Impide Misión</option>
+                <option value="4" ${item.imp === 4 ? 'selected' : ''}>4. Retarda Misión</option>
+                <option value="3" ${item.imp === 3 ? 'selected' : ''}>3. Incide en Operación</option>
+                <option value="2" ${item.imp === 2 ? 'selected' : ''}>2. Afecta Muy Poco</option>
+                <option value="1" ${item.imp === 1 ? 'selected' : ''}>1. No Afecta Objetivos</option>
+              </select>
+            </td>
+            <td><span class="badge ${badge}">${label}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    // SINCRONIZACIÓN DOFA
+    function syncDofa() {
+      const ulF = document.getElementById("dofa-f");
+      const ulD = document.getElementById("dofa-d");
+      const ulO = document.getElementById("dofa-o");
+      const ulA = document.getElementById("dofa-a");
+
+      ulF.innerHTML = ""; ulD.innerHTML = ""; ulO.innerHTML = ""; ulA.innerHTML = "";
+
+      pciData.forEach(p => {
+        const li = `<li><strong>${p.cap.split(' ')[1]}:</strong> ${p.varName} (Imp: ${p.imp})</li>`;
+        if (p.cal <= 2) ulF.innerHTML += li;
+        else if (p.cal >= 4) ulD.innerHTML += li;
+      });
+
+      pestelData.forEach(p => {
+        const li = `<li><strong>${p.dim}:</strong> ${p.varName} (${p.imp})</li>`;
+        if (p.nat === "Oportunidad") ulO.innerHTML += li;
+        else ulA.innerHTML += li;
+      });
+    }
+
+    // RENDER RIESGOS
+    function renderRisks() {
+      const tbody = document.querySelector("#table-risks tbody");
+      tbody.innerHTML = "";
+
+      risksData.forEach((item, index) => {
+        const inh = item.prob * item.imp;
+        const resVal = Math.round(inh * (1 - (item.eff / 100)));
+        const resClass = resVal >= 12 ? "badge-danger" : (resVal >= 6 ? "badge-warn" : "badge-success");
+
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" value="${item.asset}" onchange="risksData[${index}].asset = this.value; updateDashboard();"></td>
+            <td><textarea rows="2" onchange="risksData[${index}].desc = this.value;">${item.desc}</textarea></td>
+            <td><input type="number" min="1" max="5" value="${item.prob}" onchange="risksData[${index}].prob = parseInt(this.value); renderRisks();"></td>
+            <td><input type="number" min="1" max="5" value="${item.imp}" onchange="risksData[${index}].imp = parseInt(this.value); renderRisks();"></td>
+            <td style="font-weight: 800; text-align: center;">${inh}</td>
+            <td><input type="text" value="${item.ctrl}" onchange="risksData[${index}].ctrl = this.value;"></td>
+            <td>
+              <select onchange="risksData[${index}].ctrlType = this.value;">
+                <option value="Preventivo" ${item.ctrlType === 'Preventivo' ? 'selected' : ''}>Preventivo</option>
+                <option value="Detectivo" ${item.ctrlType === 'Detectivo' ? 'selected' : ''}>Detectivo</option>
+                <option value="Correctivo" ${item.ctrlType === 'Correctivo' ? 'selected' : ''}>Correctivo</option>
+              </select>
+            </td>
+            <td>
+              <select onchange="risksData[${index}].ctrlExec = this.value;">
+                <option value="Manual" ${item.ctrlExec === 'Manual' ? 'selected' : ''}>Manual</option>
+                <option value="Semiautomático" ${item.ctrlExec === 'Semiautomático' ? 'selected' : ''}>Semiautomático</option>
+                <option value="Automático" ${item.ctrlExec === 'Automático' ? 'selected' : ''}>Automático</option>
+              </select>
+            </td>
+            <td><input type="number" min="0" max="100" value="${item.eff}" onchange="risksData[${index}].eff = parseInt(this.value); renderRisks();"></td>
+            <td style="text-align: center;"><span class="badge ${resClass}">${resVal}</span></td>
+            <td><button class="btn btn-danger" style="padding: 3px 8px;" onclick="risksData.splice(${index},1); renderRisks();">✕</button></td>
+          </tr>
+        `;
+      });
+      updateDashboard();
+    }
+
+    function addRiskRow() {
+      risksData.push({
+        asset: "Nuevo Activo",
+        desc: "",
+        prob: 3, imp: 3,
+        ctrl: "Procedimiento documentado",
+        ctrlType: "Preventivo", ctrlExec: "Manual", eff: 50
+      });
+      renderRisks();
+    }
+
+    // ==============================================================
+    // ACTUALIZACIÓN DINÁMICA DEL DASHBOARD EJECUTIVO
+    // ==============================================================
+    function updateDashboard() {
+      const threats = pestelData.filter(p => p.nat === "Amenaza").length;
+      document.getElementById("dash-threats").innerText = threats;
+
+      const catWeights = {
+        "Capacidad Directiva (40%)": { w: 0.40, key: "dir" },
+        "Capacidad Tecnológica (30%)": { w: 0.30, key: "tec" },
+        "Capacidad Competitiva (20%)": { w: 0.20, key: "com" },
+        "Capacidad Financiera (5%)": { w: 0.05, key: "fin" },
+        "Capacidad Talento Humano (5%)": { w: 0.05, key: "hum" }
+      };
+
+      const catScores = { dir: [], tec: [], com: [], fin: [], hum: [] };
+      let critWeakCount = 0;
+
+      pciData.forEach(p => {
+        const healthPct = Math.round(((5 - p.cal) / 4) * 100);
+        const catObj = catWeights[p.cap];
+        if (catObj) catScores[catObj.key].push(healthPct);
+
+        if (p.cal >= 4 && p.imp >= 4) critWeakCount++;
+      });
+
+      document.getElementById("dash-weaknesses").innerText = critWeakCount;
+
+      let globalPciHealth = 0;
+      Object.keys(catWeights).forEach(capName => {
+        const item = catWeights[capName];
+        const arr = catScores[item.key];
+        const avg = arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+        document.getElementById(`pci-score-${item.key}`).innerText = avg + "%";
+        document.getElementById(`bar-${item.key}`).style.width = avg + "%";
+        globalPciHealth += (avg * item.w);
+      });
+
+      document.getElementById("dash-pci-health").innerText = Math.round(globalPciHealth) + "%";
+
+      let critRisks = 0;
+      let midRisks = 0;
+      let lowRisks = 0;
+      let totalEff = 0;
+
+      risksData.forEach(r => {
+        const inh = r.prob * r.imp;
+        const resVal = Math.round(inh * (1 - (r.eff / 100)));
+        if (resVal >= 12) critRisks++;
+        else if (resVal >= 6) midRisks++;
+        else lowRisks++;
+
+        totalEff += r.eff;
+      });
+
+      document.getElementById("dash-crit-risks").innerText = critRisks;
+      document.getElementById("heat-high").innerText = critRisks;
+      document.getElementById("heat-mid").innerText = midRisks;
+      document.getElementById("heat-low").innerText = lowRisks;
+
+      const avgEff = risksData.length > 0 ? Math.round(totalEff / risksData.length) : 0;
+      document.getElementById("dash-ctrl-eff").innerText = avgEff + "%";
+
+      const topTbody = document.getElementById("dash-top-weaknesses");
+      topTbody.innerHTML = "";
+      const weakList = pciData.filter(p => p.cal >= 4).sort((a, b) => (b.cal * b.imp) - (a.cal * a.imp)).slice(0, 5);
+      
+      weakList.forEach(w => {
+        topTbody.innerHTML += `
+          <tr>
+            <td style="font-weight: 600; color: var(--secondary);">${w.cap}</td>
+            <td>${w.varName}</td>
+            <td><span class="badge badge-danger">Debilidad (${w.cal}/5)</span></td>
+            <td style="font-weight: 700; color: #b91c1c;">Nivel ${w.imp}/5</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Inicialización global
+    renderPestel();
+    renderPci();
+    syncDofa();
+    renderRisks();
+    updateDashboard();
+  </script>
+</body>
+</html>
